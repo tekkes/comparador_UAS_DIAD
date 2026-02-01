@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de prestaciones de UAS. MALE-DIAD</title>
+    <style>
+        :root[data-theme="dark"] {
+            --color-bg-base: #0f172a;
+            --color-bg-elevated: #020617;
+            --color-bg-surface: #1e293b;
+            --color-bg-muted: #334155;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-primary: #dc2626;
+            --color-primary-hover: #b91c1c;
+            --color-border: rgba(148, 163, 184, 0.2);
+            --color-accent: #fbbf24;
+        }
+
+        :root[data-theme="light"] {
+            --color-bg-base: #ffffff;
+            --color-bg-elevated: #f8fafc;
+            --color-bg-surface: #f1f5f9;
+            --color-bg-muted: #e2e8f0;
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            --color-primary: #dc2626;
+            --color-primary-hover: #b91c1c;
+            --color-border: rgba(148, 163, 184, 0.3);
+            --color-accent: #b45309;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--color-bg-surface);
+            border-bottom: 3px solid var(--color-primary);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-left h1 {
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--color-bg-muted);
+            border: 1px solid var(--color-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .logo-img {
+            height: 80px;
+            width: auto;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        .stats-section {
+            margin-bottom: 30px;
+        }
+
+        .stats-section h2 {
+            color: var(--color-text-primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-left: 4px solid var(--color-primary);
+            padding-left: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--color-bg-surface);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: var(--color-primary);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .filters-section {
+            background: var(--color-bg-surface);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid var(--color-border);
+        }
+
+        .filters-section h3 {
+            color: var(--color-text-primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 10px 12px;
+            background: var(--color-bg-muted);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 0.95rem;
+        }
+
+        .upload-section {
+            background: var(--color-bg-surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid var(--color-border);
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-bg-muted);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-muted);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .table-container {
+            background: var(--color-bg-surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--color-bg-muted);
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            color: var(--color-text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        td {
+            padding: 12px;
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: var(--color-bg-muted);
+        }
+
+        .checkbox-cell {
+            text-align: center;
+            width: 50px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+
+            display: none;
+        }
+
+        .comparison-table {
+            background: var(--color-bg-surface);
+            border-radius: 12px;
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .comparison-table table {
+            min-width: 800px;
+        }
+
+        .param-row {
+            position: relative;
+        }
+
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+            background: var(--color-accent);
+            color: var(--color-bg-base);
+        }
+
+        .chart-container {
+            background: var(--color-bg-surface);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--color-border);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--color-bg-surface);
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 1000px;
+            border: 1px solid var(--color-border);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: var(--color-text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--color-text-primary);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            .btn, .theme-toggle, .upload-section, .filters-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>Comparador de prestaciones de UAS. MALE-DIAD</h1>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Cambiar tema</button>
+            <img src="https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/6dd84d32-4985-45f0-9adb-684d67c852e8" alt="Escudo DIAD" class="logo-img">
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="mainView">
+            <div class="upload-section">
+                <h3>📁 Cargar nueva base de datos</h3>
+                <div class="file-input-wrapper">
+                    <input type="file" id="excelFile" accept=".xlsx,.xls">
+                    <button class="btn" onclick="loadExcelFile()">Cargar datos</button>
+                </div>
+            </div>
+
+            <div class="filters-section">
+                <h3>🔍 Filtros y Ordenación</h3>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Fabricante</label>
+                        <select id="filterFabricante" onchange="applyFilters()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>País</label>
+                        <select id="filterPais" onchange="applyFilters()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Ordenar por</label>
+                        <select id="sortBy" onchange="applyFilters()">
+                            <option value="">Sin ordenar</option>
+                            <option value="modelo">Modelo (A-Z)</option>
+                            <option value="pesoAsc">Peso (menor a mayor)</option>
+                            <option value="pesoDesc">Peso (mayor a menor)</option>
+                            <option value="pais">País</option>
+                            <option value="fabricante">Fabricante</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Buscar</label>
+                        <input type="text" id="searchInput" placeholder="Buscar modelo..." oninput="applyFilters()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2>📊 Estadísticas Generales</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell"></th>
+                            <th>Modelo</th>
+                            <th>Fabricante</th>
+                            <th>País</th>
+                            <th>MTOW (kg)</th>
+                            <th>Autonomía (h)</th>
+                            <th>Alcance (km)</th>
+                            <th>Velocidad Máx (km/h)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uasTableBody"></tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" id="compareBtn" onclick="showComparison()" disabled>Comparar Seleccionados (0)</button>
+            </div>
+        </div>
+
+        <div id="comparisonView" class="comparison-view">
+            <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: var(--color-primary);">Comparación de UAS</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="generatePDF()">📄 Generar PDF</button>
+                    <button class="btn" onclick="backToMain()">← Volver al Dashboard</button>
+                </div>
+            </div>
+
+            <div id="comparisonTableContainer" class="comparison-table"></div>
+            <div id="chartsContainer"></div>
+        </div>
+    </div>
+
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalChartTitle"></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <canvas id="modalChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let uasData = [{"modelo": "RQ-7B Shadow", "fabricante": "AAI/Textron", "pais": "USA", "mtow": "150", "envergadura": "3.9", "longitud": "3.4", "cargaUtil": "60", "autonomia": "6-7", "alcance": "125", "techo": "4570", "velocidadMax": "207", "velocidadCrucero": "130", "motor": "UEL AR-741 Wankel 38hp", "tipoEnlace": "TCDL, 125 km LOS", "sensores": "EO/IR gimbal, laser designator, SIGINT", "tipoOperacion": "ISR, BDA, target acquisition", "lanzamiento": "Catapulta neumática/Red de detención", "web": "https://www.aai.textron.com"}, {"modelo": "RQ-21A Blackjack", "fabricante": "Insitu/Boeing", "pais": "USA", "mtow": "61", "envergadura": "4.9", "longitud": "2.5", "cargaUtil": "18", "autonomia": "16", "alcance": "93", "techo": "5944", "velocidadMax": "170", "velocidadCrucero": "100", "motor": "EFI Piston 8hp", "tipoEnlace": "LOS 93 km", "sensores": "EO/IR, laser rangefinder, AIS, SAR/GMTI", "tipoOperacion": "ISR táctica, maritime patrol", "lanzamiento": "Catapulta/SkyHook", "web": "https://www.insitu.com"}, {"modelo": "Puma AE/LE", "fabricante": "AeroVironment", "pais": "USA", "mtow": "6.5", "envergadura": "2.8", "longitud": "1.4", "cargaUtil": "2.5", "autonomia": "5.5-6.5", "alcance": "20", "techo": "4572", "velocidadMax": "81", "velocidadCrucero": "65", "motor": "Eléctrico", "tipoEnlace": "LOS 20 km", "sensores": "Mantis i45 gimbal EO/IR", "tipoOperacion": "ISR táctica", "lanzamiento": "Lanzamiento manual/Aterrizaje controlado", "web": "https://www.avinc.com"}, {"modelo": "Switchblade 300", "fabricante": "AeroVironment", "pais": "USA", "mtow": "2.5", "envergadura": "0.686", "longitud": "0.495", "cargaUtil": "munición", "autonomia": "0.25", "alcance": "10", "techo": "4600", "velocidadMax": "160", "velocidadCrucero": "100", "motor": "Eléctrico", "tipoEnlace": "10 km", "sensores": "EO dual, IR nose camera, zoom PTZ", "tipoOperacion": "Loitering munition, ISR", "lanzamiento": "Tubo lanzador", "web": "https://www.avinc.com"}, {"modelo": "Switchblade 600", "fabricante": "AeroVironment", "pais": "USA", "mtow": "29.5", "envergadura": "n/d", "longitud": "n/d", "cargaUtil": "munición 6kg warhead", "autonomia": "0.67", "alcance": "40", "techo": "n/d", "velocidadMax": "185", "velocidadCrucero": "115", "motor": "Eléctrico", "tipoEnlace": "40+ km", "sensores": "High-res EO/IR gimbal", "tipoOperacion": "Anti-armor loitering munition", "lanzamiento": "Tubo lanzador", "web": "https://www.avinc.com"}, {"modelo": "Phoenix Ghost", "fabricante": "Aevex Aerospace", "pais": "USA", "mtow": "n/d", "envergadura": "n/d", "longitud": "n/d", "cargaUtil": "munición loitering", "autonomia": "6+", "alcance": "n/d", "techo": "n/d", "velocidadMax": "n/d", "velocidadCrucero": "n/d", "motor": "Eléctrico", "tipoEnlace": "n/d", "sensores": "EO/IR gimbal", "tipoOperacion": "Loitering munition, ISR", "lanzamiento": "Tubo lanzador", "web": "n/d"}, {"modelo": "Altius 600M", "fabricante": "Anduril/Area-I", "pais": "USA", "mtow": "130", "envergadura": "3.4", "longitud": "2.9", "cargaUtil": "29", "autonomia": "4", "alcance": "440", "techo": "6000", "velocidadMax": "185", "velocidadCrucero": "111", "motor": "Eléctrico", "tipoEnlace": "BLOS 440 km", "sensores": "EO/IR stabilized gimbal, SAR", "tipoOperacion": "ISR, strike loitering munition", "lanzamiento": "Catapulta/Paracaídas", "web": "https://www.anduril.com"}, {"modelo": "Bayraktar TB2", "fabricante": "Baykar", "pais": "Turquía", "mtow": "700", "envergadura": "12", "longitud": "6.5", "cargaUtil": "150", "autonomia": "27", "alcance": "150", "techo": "8230", "velocidadMax": "220", "velocidadCrucero": "130", "motor": "Rotax 912 iS 100hp", "tipoEnlace": "SATCOM, TCDL LOS 150 km", "sensores": "Wescam MX-15Di EO/IR, SAR optional", "tipoOperacion": "Armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.baykartech.com"}, {"modelo": "Bayraktar Akıncı", "fabricante": "Baykar", "pais": "Turquía", "mtow": "5500", "envergadura": "20", "longitud": "12.5", "cargaUtil": "1350", "autonomia": "24", "alcance": "n/d", "techo": "13106", "velocidadMax": "360", "velocidadCrucero": "195", "motor": "2x Ivchenko Progress AI-450C 450hp", "tipoEnlace": "SATCOM, TCDL BLOS", "sensores": "ASELSAN CATS, SAR/GMTI", "tipoOperacion": "HALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.baykartech.com"}, {"modelo": "Anka", "fabricante": "TAI", "pais": "Turquía", "mtow": "1700", "envergadura": "17.3", "longitud": "8.0", "cargaUtil": "200", "autonomia": "24", "alcance": "200", "techo": "9144", "velocidadMax": "217", "velocidadCrucero": "185", "motor": "Thielert Centurion 2.0S 155hp", "tipoEnlace": "SATCOM, LOS 200 km", "sensores": "ASELSAN CATS EO/IR, SAR", "tipoOperacion": "MALE ISR, armed", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.tai.com.tr"}, {"modelo": "Anka-S", "fabricante": "TAI", "pais": "Turquía", "mtow": "1700", "envergadura": "17.3", "longitud": "8.0", "cargaUtil": "200", "autonomia": "24", "alcance": "n/d", "techo": "9144", "velocidadMax": "217", "velocidadCrucero": "185", "motor": "PD-170 170hp", "tipoEnlace": "SATCOM BLOS", "sensores": "ASELSAN CATS, SAR/GMTI", "tipoOperacion": "MALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.tai.com.tr"}, {"modelo": "Alpagu", "fabricante": "STM", "pais": "Turquía", "mtow": "3.5", "envergadura": "1.2", "longitud": "0.7", "cargaUtil": "munición 1.3 kg", "autonomia": "0.33", "alcance": "5", "techo": "n/d", "velocidadMax": "130", "velocidadCrucero": "80", "motor": "Eléctrico", "tipoEnlace": "5 km LOS", "sensores": "EO/IR gimbal", "tipoOperacion": "Kamikaze loitering munition", "lanzamiento": "Tubo lanzador", "web": "https://www.stm.com.tr"}, {"modelo": "Kargu-2", "fabricante": "STM", "pais": "Turquía", "mtow": "15", "envergadura": "1.5", "longitud": "0.6", "cargaUtil": "munición 1.5 kg", "autonomia": "0.5", "alcance": "5", "techo": "n/d", "velocidadMax": "144", "velocidadCrucero": "90", "motor": "Eléctrico quad-rotor", "tipoEnlace": "5 km", "sensores": "EO day camera, AI target recognition", "tipoOperacion": "Swarm loitering munition, anti-personnel", "lanzamiento": "Manual, vertical", "web": "https://www.stm.com.tr"}, {"modelo": "Watchkeeper WK450", "fabricante": "Thales UK", "pais": "UK", "mtow": "450", "envergadura": "10.9", "longitud": "6.5", "cargaUtil": "150", "autonomia": "16", "alcance": "150", "techo": "5000", "velocidadMax": "148", "velocidadCrucero": "130", "motor": "Rotax 914 115hp", "tipoEnlace": "TCDL, LOS 150 km", "sensores": "EO/IR Thales I-Master SAR, GMTI", "tipoOperacion": "MALE ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.thalesgroup.com"}, {"modelo": "MQ-1C Gray Eagle", "fabricante": "General Atomics", "pais": "USA", "mtow": "1633", "envergadura": "17", "longitud": "8.0", "cargaUtil": "360", "autonomia": "25", "alcance": "200", "techo": "8839", "velocidadMax": "280", "velocidadCrucero": "167", "motor": "Thielert Centurion 1.7 165hp", "tipoEnlace": "SATCOM, TCDL LOS 200 km", "sensores": "Lynx SAR/GMTI, EO/IR", "tipoOperacion": "MALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.ga-asi.com"}, {"modelo": "MQ-9A Reaper", "fabricante": "General Atomics", "pais": "USA", "mtow": "4760", "envergadura": "20", "longitud": "11", "cargaUtil": "1700", "autonomia": "27", "alcance": "1850", "techo": "15240", "velocidadMax": "482", "velocidadCrucero": "370", "motor": "Honeywell TPE331-10 900hp", "tipoEnlace": "SATCOM BLOS, TCDL", "sensores": "MTS-B EO/IR, Lynx SAR", "tipoOperacion": "MALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.ga-asi.com"}, {"modelo": "MQ-9B SkyGuardian", "fabricante": "General Atomics", "pais": "USA", "mtow": "5670", "envergadura": "24", "longitud": "11.7", "cargaUtil": "2155", "autonomia": "40", "alcance": "n/d", "techo": "12192", "velocidadMax": "370", "velocidadCrucero": "333", "motor": "Honeywell TPE331-10 900hp", "tipoEnlace": "SATCOM BLOS, TCDL", "sensores": "MTS-B EO/IR, SeaGuardian maritime radar", "tipoOperacion": "MALE armed ISR, strike, maritime", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.ga-asi.com"}, {"modelo": "Heron 1", "fabricante": "IAI", "pais": "Israel", "mtow": "1200", "envergadura": "16.6", "longitud": "8.5", "cargaUtil": "250", "autonomia": "45", "alcance": "350", "techo": "10668", "velocidadMax": "207", "velocidadCrucero": "148", "motor": "Rotax 914 115hp", "tipoEnlace": "SATCOM, LOS 350 km", "sensores": "Toplite EO/IR, SAR optional", "tipoOperacion": "MALE ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.iai.co.il"}, {"modelo": "Heron TP (Eitan)", "fabricante": "IAI", "pais": "Israel", "mtow": "5400", "envergadura": "26", "longitud": "14", "cargaUtil": "1000", "autonomia": "36", "alcance": "n/d", "techo": "13716", "velocidadMax": "370", "velocidadCrucero": "220", "motor": "Pratt & Whitney Canada PT6A 1200hp", "tipoEnlace": "SATCOM BLOS", "sensores": "Multi-sensor EO/IR, SAR/GMTI", "tipoOperacion": "HALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.iai.co.il"}, {"modelo": "Harop", "fabricante": "IAI", "pais": "Israel", "mtow": "135", "envergadura": "2.5", "longitud": "2.5", "cargaUtil": "munición 23 kg", "autonomia": "6", "alcance": "1000", "techo": "4572", "velocidadMax": "185", "velocidadCrucero": "130", "motor": "UEL AR-731 Wankel 52hp", "tipoEnlace": "LOS/datalink 1000 km", "sensores": "Autonomous anti-radiation seeker", "tipoOperacion": "Anti-radiation loitering munition", "lanzamiento": "Catapulta/Kamikaze", "web": "https://www.iai.co.il"}, {"modelo": "Hermes 900 Kochav", "fabricante": "Elbit Systems", "pais": "Israel", "mtow": "1180", "envergadura": "15", "longitud": "8.3", "cargaUtil": "350", "autonomia": "36", "alcance": "200", "techo": "9144", "velocidadMax": "220", "velocidadCrucero": "185", "motor": "Rotax 914 115hp", "tipoEnlace": "SATCOM, LOS 200 km", "sensores": "DCompass EO/IR, SAR optional", "tipoOperacion": "MALE ISR, armed", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://elbitsystems.com"}, {"modelo": "Hermes 900 StarLiner", "fabricante": "Elbit Systems", "pais": "Israel", "mtow": "1200", "envergadura": "17", "longitud": "8.3", "cargaUtil": "450", "autonomia": "36", "alcance": "n/d", "techo": "9144", "velocidadMax": "220", "velocidadCrucero": "185", "motor": "Rotax 914 115hp", "tipoEnlace": "SATCOM BLOS", "sensores": "DCompass EO/IR, SAR/GMTI", "tipoOperacion": "MALE armed ISR, maritime", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://elbitsystems.com"}, {"modelo": "Skylark I-LEX", "fabricante": "Elbit Systems", "pais": "Israel", "mtow": "7.5", "envergadura": "2.3", "longitud": "1.2", "cargaUtil": "munición loitering", "autonomia": "3", "alcance": "10", "techo": "4572", "velocidadMax": "140", "velocidadCrucero": "90", "motor": "Eléctrico", "tipoEnlace": "10 km LOS", "sensores": "EO/IR gimbal", "tipoOperacion": "Loitering munition, ISR", "lanzamiento": "Tubo lanzador", "web": "https://elbitsystems.com"}, {"modelo": "Lanius", "fabricante": "Elbit Systems", "pais": "Israel", "mtow": "1.25", "envergadura": "0.3", "longitud": "0.3", "cargaUtil": "munición 150g", "autonomia": "0.12", "alcance": "1", "techo": "n/d", "velocidadMax": "80", "velocidadCrucero": "50", "motor": "Eléctrico quad-rotor", "tipoEnlace": "1 km", "sensores": "EO camera, AI recognition", "tipoOperacion": "Indoor/outdoor kamikaze micro-UAV", "lanzamiento": "Manual, vertical", "web": "https://elbitsystems.com"}, {"modelo": "Orbiter 4", "fabricante": "Aeronautics", "pais": "Israel", "mtow": "27", "envergadura": "5.5", "longitud": "2.2", "cargaUtil": "6", "autonomia": "24", "alcance": "150", "techo": "5486", "velocidadMax": "185", "velocidadCrucero": "110", "motor": "Eléctrico", "tipoEnlace": "LOS 150 km", "sensores": "Controp U-SEE EO/IR", "tipoOperacion": "Mini-UAV ISR", "lanzamiento": "Catapulta neumática/Paracaídas", "web": "https://www.aeronautics-sys.com"}, {"modelo": "Predator B (MQ-9)", "fabricante": "General Atomics", "pais": "USA", "mtow": "4760", "envergadura": "20", "longitud": "11", "cargaUtil": "1700", "autonomia": "27", "alcance": "1850", "techo": "15240", "velocidadMax": "482", "velocidadCrucero": "370", "motor": "Honeywell TPE331-10 900hp", "tipoEnlace": "SATCOM BLOS", "sensores": "MTS-B EO/IR, Lynx SAR", "tipoOperacion": "MALE armed ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.ga-asi.com"}, {"modelo": "CH-4B Rainbow", "fabricante": "CASC", "pais": "China", "mtow": "1330", "envergadura": "18", "longitud": "8.5", "cargaUtil": "345", "autonomia": "30", "alcance": "250", "techo": "7000", "velocidadMax": "235", "velocidadCrucero": "180", "motor": "n/d piston engine", "tipoEnlace": "SATCOM, LOS 250 km", "sensores": "EO/IR turret, SAR/GMTI", "tipoOperacion": "MALE armed ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "n/d"}, {"modelo": "CH-5", "fabricante": "CASC", "pais": "China", "mtow": "3300", "envergadura": "21", "longitud": "11", "cargaUtil": "1000", "autonomia": "60", "alcance": "250", "techo": "9000", "velocidadMax": "300", "velocidadCrucero": "200", "motor": "n/d heavy-fuel piston", "tipoEnlace": "SATCOM BLOS, LOS 250 km", "sensores": "EO/IR, SAR/GMTI", "tipoOperacion": "HALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "n/d"}, {"modelo": "Wing Loong I", "fabricante": "AVIC", "pais": "China", "mtow": "1200", "envergadura": "14", "longitud": "9.0", "cargaUtil": "200", "autonomia": "20", "alcance": "n/d", "techo": "5000", "velocidadMax": "280", "velocidadCrucero": "170", "motor": "Rotax 914 100hp", "tipoEnlace": "LOS", "sensores": "EO/IR turret", "tipoOperacion": "MALE armed ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "n/d"}, {"modelo": "Wing Loong II", "fabricante": "AVIC", "pais": "China", "mtow": "4200", "envergadura": "20.5", "longitud": "11", "cargaUtil": "480", "autonomia": "32", "alcance": "n/d", "techo": "9000", "velocidadMax": "370", "velocidadCrucero": "230", "motor": "n/d turboprop", "tipoEnlace": "SATCOM BLOS", "sensores": "EO/IR, SAR/GMTI, ESM", "tipoOperacion": "MALE armed ISR, strike", "lanzamiento": "Pista/Aterrizaje convencional", "web": "n/d"}, {"modelo": "Patroller", "fabricante": "Safran/Sagem", "pais": "Francia", "mtow": "700", "envergadura": "12", "longitud": "4.2", "cargaUtil": "250", "autonomia": "30", "alcance": "200", "techo": "6096", "velocidadMax": "185", "velocidadCrucero": "120", "motor": "Lycoming DEL-120 210hp", "tipoEnlace": "LOS 200 km", "sensores": "Euroflir 410 EO/IR", "tipoOperacion": "MALE ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.safran-group.com"}, {"modelo": "Neuron UCAV", "fabricante": "Dassault/Consorcio", "pais": "Francia", "mtow": "7000", "envergadura": "12.5", "longitud": "9.5", "cargaUtil": "n/d municiones internas", "autonomia": "n/d", "alcance": "n/d", "techo": "13716", "velocidadMax": "980", "velocidadCrucero": "n/d", "motor": "Rolls-Royce Adour Mk951 turbofan", "tipoEnlace": "SATCOM BLOS", "sensores": "EO/IR nose sensor, SAR", "tipoOperacion": "UCAV stealth strike demonstrator", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.dassault-aviation.com"}, {"modelo": "Talarion MALE", "fabricante": "Airbus Defence", "pais": "Alemania", "mtow": "n/d", "envergadura": "n/d", "longitud": "n/d", "cargaUtil": "n/d", "autonomia": "40+", "alcance": "n/d", "techo": "n/d", "velocidadMax": "n/d", "velocidadCrucero": "n/d", "motor": "n/d", "tipoEnlace": "SATCOM BLOS", "sensores": "Multi-sensor EO/IR, SAR", "tipoOperacion": "MALE armed ISR (in development)", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.airbus.com"}, {"modelo": "Luna NG", "fabricante": "EMT/Airbus", "pais": "Alemania", "mtow": "40", "envergadura": "5.2", "longitud": "2.5", "cargaUtil": "5", "autonomia": "12", "alcance": "100", "techo": "5000", "velocidadMax": "130", "velocidadCrucero": "100", "motor": "Eléctrico", "tipoEnlace": "LOS 100 km", "sensores": "Hensoldt Argos II HD EO/IR", "tipoOperacion": "Tactical ISR", "lanzamiento": "Catapulta/Paracaídas", "web": "https://www.airbus.com"}, {"modelo": "Falco Xplorer", "fabricante": "Leonardo", "pais": "Italia", "mtow": "1300", "envergadura": "21", "longitud": "9.5", "cargaUtil": "350", "autonomia": "24", "alcance": "200", "techo": "7315", "velocidadMax": "222", "velocidadCrucero": "185", "motor": "Lycoming DEL-120 210hp", "tipoEnlace": "SATCOM, LOS 200 km", "sensores": "SAGE EO/IR, SAR/GMTI", "tipoOperacion": "MALE armed ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.leonardo.com"}, {"modelo": "S-100 Camcopter", "fabricante": "Schiebel", "pais": "Austria", "mtow": "200", "envergadura": "n/d (rotary)", "longitud": "3.1", "cargaUtil": "50", "autonomia": "6", "alcance": "200", "techo": "5486", "velocidadMax": "220", "velocidadCrucero": "185", "motor": "Rotax 914 55hp", "tipoEnlace": "LOS 200 km, BLOS optional", "sensores": "EO/IR gimbal, optional SAR", "tipoOperacion": "VTOL ISR, maritime", "lanzamiento": "Vertical VTOL", "web": "https://www.schiebel.net"}, {"modelo": "Mojave", "fabricante": "General Atomics", "pais": "USA", "mtow": "n/d", "envergadura": "n/d", "longitud": "n/d", "cargaUtil": "n/d", "autonomia": "25+", "alcance": "n/d", "techo": "7620", "velocidadMax": "n/d", "velocidadCrucero": "n/d", "motor": "Turboprop", "tipoEnlace": "SATCOM BLOS", "sensores": "MTS-B EO/IR", "tipoOperacion": "MALE STOL expeditionary ISR", "lanzamiento": "STOL pista corta", "web": "https://www.ga-asi.com"}, {"modelo": "ScanEagle 3", "fabricante": "Insitu/Boeing", "pais": "USA", "mtow": "35", "envergadura": "3.1", "longitud": "1.6", "cargaUtil": "6", "autonomia": "18", "alcance": "130", "techo": "5944", "velocidadMax": "148", "velocidadCrucero": "111", "motor": "Eléctrico", "tipoEnlace": "LOS 130 km", "sensores": "EO/IR multi-sensor", "tipoOperacion": "Tactical ISR, maritime", "lanzamiento": "Catapulta/SkyHook", "web": "https://www.insitu.com"}, {"modelo": "Integrator", "fabricante": "Insitu/Boeing", "pais": "USA", "mtow": "61", "envergadura": "4.9", "longitud": "2.5", "cargaUtil": "18", "autonomia": "24", "alcance": "120", "techo": "6096", "velocidadMax": "111", "velocidadCrucero": "85", "motor": "Eléctrico", "tipoEnlace": "LOS 120 km", "sensores": "EO/IR gimbal, customer payload", "tipoOperacion": "Tactical ISR", "lanzamiento": "Catapulta/SkyHook", "web": "https://www.insitu.com"}, {"modelo": "Hermes 450", "fabricante": "Elbit Systems", "pais": "Israel", "mtow": "550", "envergadura": "10.5", "longitud": "6.1", "cargaUtil": "180", "autonomia": "20", "alcance": "200", "techo": "5486", "velocidadMax": "185", "velocidadCrucero": "130", "motor": "Rotax 914 115hp", "tipoEnlace": "LOS 200 km", "sensores": "DCompass EO/IR", "tipoOperacion": "MALE ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://elbitsystems.com"}, {"modelo": "Searcher Mk II", "fabricante": "IAI", "pais": "Israel", "mtow": "476", "envergadura": "8.55", "longitud": "5.85", "cargaUtil": "120", "autonomia": "18", "alcance": "250", "techo": "6096", "velocidadMax": "200", "velocidadCrucero": "130", "motor": "UEL AR-801 Wankel 85hp", "tipoEnlace": "LOS 250 km", "sensores": "Toplite EO/IR", "tipoOperacion": "MALE ISR", "lanzamiento": "Pista/Aterrizaje convencional", "web": "https://www.iai.co.il"}];
+        let filteredData = [];
+        let selectedUAS = [];
+        let currentChart = null;
+
+        function initTheme() {
+            const savedTheme = 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+        }
+
+        function parseNumeric(value) {
+            if (!value || value === 'n/d') return null;
+            const str = String(value).replace(/[^\d.-]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? null : num;
+        }
+
+        function updateStats() {
+            const stats = {
+                total: uasData.length,
+                fabricantes: new Set(uasData.map(u => u.fabricante)).size,
+                paises: new Set(uasData.map(u => u.pais)).size,
+                pesoMin: Math.min(...uasData.map(u => parseNumeric(u.mtow)).filter(v => v !== null)),
+                pesoMax: Math.max(...uasData.map(u => parseNumeric(u.mtow)).filter(v => v !== null)),
+                velocidadMin: Math.min(...uasData.map(u => parseNumeric(u.velocidadMax)).filter(v => v !== null)),
+                velocidadMax: Math.max(...uasData.map(u => parseNumeric(u.velocidadMax)).filter(v => v !== null)),
+                alcanceMin: Math.min(...uasData.map(u => parseNumeric(u.alcance)).filter(v => v !== null)),
+                alcanceMax: Math.max(...uasData.map(u => parseNumeric(u.alcance)).filter(v => v !== null)),
+                autonomiaMin: Math.min(...uasData.map(u => parseNumeric(u.autonomia)).filter(v => v !== null)),
+                autonomiaMax: Math.max(...uasData.map(u => parseNumeric(u.autonomia)).filter(v => v !== null))
+            };
+
+            const paisesCounts = {};
+            uasData.forEach(u => {
+                paisesCounts[u.pais] = (paisesCounts[u.pais] || 0) + 1;
+            });
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-label">Total UAS</div><div class="stat-value">${stats.total}</div></div>
+                <div class="stat-card"><div class="stat-label">Fabricantes</div><div class="stat-value">${stats.fabricantes}</div></div>
+                <div class="stat-card"><div class="stat-label">Países</div><div class="stat-value">${stats.paises}</div></div>
+                <div class="stat-card"><div class="stat-label">Peso (kg)</div><div class="stat-value">${stats.pesoMin.toFixed(0)} - ${stats.pesoMax.toFixed(0)}</div></div>
+                <div class="stat-card"><div class="stat-label">Velocidad (km/h)</div><div class="stat-value">${stats.velocidadMin} - ${stats.velocidadMax}</div></div>
+                <div class="stat-card"><div class="stat-label">Alcance (km)</div><div class="stat-value">${stats.alcanceMin} - ${stats.alcanceMax}</div></div>
+                <div class="stat-card"><div class="stat-label">Autonomía (h)</div><div class="stat-value">${stats.autonomiaMin.toFixed(1)} - ${stats.autonomiaMax}</div></div>
+                <div class="stat-card"><div class="stat-label">Distribución países</div><div class="stat-value" style="font-size:0.9rem">${Object.entries(paisesCounts).map(([p,c]) => `${p}: ${c}`).join(' | ')}</div></div>
+            `;
+        }
+
+        function updateFilters() {
+            const fabricantes = [...new Set(uasData.map(u => u.fabricante))].sort();
+            const paises = [...new Set(uasData.map(u => u.pais))].sort();
+
+            document.getElementById('filterFabricante').innerHTML = 
+                '<option value="">Todos</option>' + fabricantes.map(f => `<option value="${f}">${f}</option>`).join('');
+            
+            document.getElementById('filterPais').innerHTML = 
+                '<option value="">Todos</option>' + paises.map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+
+        function applyFilters() {
+            const fabricante = document.getElementById('filterFabricante').value;
+            const pais = document.getElementById('filterPais').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortBy').value;
+
+            filteredData = uasData.filter(u => {
+                return (!fabricante || u.fabricante === fabricante) &&
+                       (!pais || u.pais === pais) &&
+                       (!search || u.modelo.toLowerCase().includes(search));
+            });
+
+            if (sortBy === 'modelo') filteredData.sort((a, b) => a.modelo.localeCompare(b.modelo));
+            else if (sortBy === 'pesoAsc') filteredData.sort((a, b) => (parseNumeric(a.mtow) || 999999) - (parseNumeric(b.mtow) || 999999));
+            else if (sortBy === 'pesoDesc') filteredData.sort((a, b) => (parseNumeric(b.mtow) || 0) - (parseNumeric(a.mtow) || 0));
+            else if (sortBy === 'pais') filteredData.sort((a, b) => a.pais.localeCompare(b.pais));
+            else if (sortBy === 'fabricante') filteredData.sort((a, b) => a.fabricante.localeCompare(b.fabricante));
+
+            updateTable();
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('uasTableBody');
+            tbody.innerHTML = filteredData.map((uas, idx) => `
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox" onchange="toggleSelection('${uas.modelo}', this)"></td>
+                    <td><strong>${uas.modelo}</strong></td>
+                    <td>${uas.fabricante}</td>
+                    <td>${uas.pais}</td>
+                    <td>${uas.mtow}</td>
+                    <td>${uas.autonomia}</td>
+                    <td>${uas.alcance}</td>
+                    <td>${uas.velocidadMax}</td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleSelection(modelo, checkbox) {
+            const idx = selectedUAS.findIndex(u => u.modelo === modelo);
+            if (idx >= 0) {
+                selectedUAS.splice(idx, 1);
+            } else {
+                if (selectedUAS.length >= 4) {
+                    alert('Máximo 4 UAS para comparar. Deselecciona uno primero.');
+                    checkbox.checked = false;
+                    return;
+                }
+                const uas = uasData.find(u => u.modelo === modelo);
+                selectedUAS.push(uas);
+            }
+            document.getElementById('compareBtn').textContent = `Comparar Seleccionados (${selectedUAS.length})`;
+            document.getElementById('compareBtn').disabled = selectedUAS.length === 0;
+        }
+
+        function showComparison() {
+            if (selectedUAS.length === 0) return;
+
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('comparisonView').style.display = 'block';
+
+            const params = [
+                {key: 'fabricante', label: 'Fabricante'},
+                {key: 'pais', label: 'País'},
+                {key: 'mtow', label: 'MTOW (kg)', chart: true},
+                {key: 'envergadura', label: 'Envergadura (m)'},
+                {key: 'longitud', label: 'Longitud (m)'},
+                {key: 'cargaUtil', label: 'Carga Útil (kg)'},
+                {key: 'autonomia', label: 'Autonomía (h)', chart: true},
+                {key: 'alcance', label: 'Alcance (km)', chart: true},
+                {key: 'techo', label: 'Techo (m)'},
+                {key: 'velocidadMax', label: 'Velocidad Máx (km/h)', chart: true},
+                {key: 'velocidadCrucero', label: 'Velocidad Crucero (km/h)'},
+                {key: 'motor', label: 'Motor/Propulsión'},
+                {key: 'tipoEnlace', label: 'Tipo Enlace'},
+                {key: 'sensores', label: 'Sensores/Payload'},
+                {key: 'tipoOperacion', label: 'Tipo Operación'},
+                {key: 'lanzamiento', label: 'Lanzamiento/Recuperación'}
+            ];
+
+            let tableHTML = '<table><thead><tr><th>Parámetro</th>';
+            selectedUAS.forEach(uas => {
+                tableHTML += `<th>${uas.modelo}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            params.forEach(param => {
+                tableHTML += `<tr class="param-row"><td><strong>${param.label}</strong>`;
+                if (param.chart) {
+                    tableHTML += `<button class="btn chart-btn" onclick="showChart('${param.key}', '${param.label}')">📊</button>`;
+                }
+                tableHTML += '</td>';
+                selectedUAS.forEach(uas => {
+                    tableHTML += `<td>${uas[param.key] || '-'}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            document.getElementById('comparisonTableContainer').innerHTML = tableHTML;
+
+            generateCharts();
+        }
+
+        function backToMain() {
+            document.getElementById('comparisonView').style.display = 'none';
+            document.getElementById('mainView').style.display = 'block';
+            selectedUAS = [];
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            document.getElementById('compareBtn').textContent = 'Comparar Seleccionados (0)';
+            document.getElementById('compareBtn').disabled = true;
+        }
+
+        function generateCharts() {
+            const chartsHTML = `
+                <div class="chart-container"><canvas id="chartPeso"></canvas></div>
+                <div class="chart-container"><canvas id="chartAlcance"></canvas></div>
+                <div class="chart-container"><canvas id="chartAutonomia"></canvas></div>
+                <div class="chart-container"><canvas id="chartVelocidad"></canvas></div>
+            `;
+            document.getElementById('chartsContainer').innerHTML = chartsHTML;
+
+            createBarChart('chartPeso', 'Peso MTOW (kg)', 'mtow');
+            createBarChart('chartAlcance', 'Alcance (km)', 'alcance');
+            createBarChart('chartAutonomia', 'Autonomía (h)', 'autonomia');
+            createBarChart('chartVelocidad', 'Velocidad Máxima (km/h)', 'velocidadMax');
+        }
+
+        function createBarChart(canvasId, title, key) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: selectedUAS.map(u => u.modelo),
+                    datasets: [{
+                        label: title,
+                        data: selectedUAS.map(u => parseNumeric(u[key]) || 0),
+                        backgroundColor: ['#dc2626', '#fbbf24', '#059669', '#3b82f6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: title, font: { size: 16 } }
+                    }
+                }
+            });
+        }
+
+        function showChart(key, label) {
+            document.getElementById('chartModal').style.display = 'block';
+            document.getElementById('modalChartTitle').textContent = `Comparación: ${label}`;
+
+            if (currentChart) currentChart.destroy();
+
+            const ctx = document.getElementById('modalChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: selectedUAS.map(u => u.modelo),
+                    datasets: [{
+                        label: label,
+                        data: selectedUAS.map(u => parseNumeric(u[key]) || 0),
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true },
+                        title: { display: true, text: label, font: { size: 18 } }
+                    }
+                }
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('chartModal').style.display = 'none';
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const today = new Date().toLocaleDateString('es-ES');
+
+            pdf.setFontSize(16);
+            pdf.text('Comparador de prestaciones de UAS. MALE-DIAD', 20, 20);
+            pdf.setFontSize(10);
+            pdf.text(`Fecha: ${today}`, 20, 28);
+            pdf.text(`UAS comparados: ${selectedUAS.map(u => u.modelo).join(', ')}`, 20, 35);
+
+            let yPos = 45;
+            pdf.setFontSize(12);
+            pdf.text('Tabla de Comparación', 20, yPos);
+            yPos += 10;
+
+            pdf.setFontSize(8);
+            const params = ['fabricante', 'pais', 'mtow', 'autonomia', 'alcance', 'velocidadMax'];
+            params.forEach(param => {
+                let line = `${param}: `;
+                selectedUAS.forEach(uas => {
+                    line += `${uas.modelo}=${uas[param] || 'n/d'} | `;
+                });
+                pdf.text(line, 20, yPos);
+                yPos += 6;
+            });
+
+            pdf.save(`comparacion-uas-${today}.pdf`);
+        }
+
+        function loadExcelFile() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Selecciona un archivo Excel primero.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    uasData = jsonData.map(row => ({
+                        modelo: String(row['MODELO'] || ''),
+                        fabricante: String(row['FABRICANTE'] || ''),
+                        pais: String(row['PAÍS'] || ''),
+                        mtow: String(row['MTOW (kg)'] || ''),
+                        envergadura: String(row['ENVERGADURA (m)'] || ''),
+                        longitud: String(row['LONGITUD (m)'] || ''),
+                        cargaUtil: String(row['CARGA ÚTIL (kg)'] || ''),
+                        autonomia: String(row['AUTONOMÍA (h)'] || ''),
+                        alcance: String(row['ALCANCE (km)'] || ''),
+                        techo: String(row['TECHO (m)'] || ''),
+                        velocidadMax: String(row['VELOCIDAD MAX (km/h)'] || ''),
+                        velocidadCrucero: String(row['VELOCIDAD CRUCERO (km/h)'] || ''),
+                        motor: String(row['MOTOR/PROPULSIÓN'] || ''),
+                        tipoEnlace: String(row['TIPO ENLACE'] || ''),
+                        sensores: String(row['SENSORES/PAYLOAD'] || ''),
+                        tipoOperacion: String(row['TIPO OPERACIÓN'] || ''),
+                        lanzamiento: String(row['LANZAMIENTO/RECUPERACIÓN'] || ''),
+                        web: String(row['WEB'] || '')
+                    }));
+
+                    filteredData = [...uasData];
+                    updateStats();
+                    updateFilters();
+                    applyFilters();
+                    alert(`✅ Datos cargados: ${uasData.length} UAS`);
+                } catch (error) {
+                    alert('Error al procesar el archivo Excel.');
+                    console.error(error);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        initTheme();
+        filteredData = [...uasData];
+        updateStats();
+        updateFilters();
+        updateTable();
+    </script>
+</body>
+</html>
+
